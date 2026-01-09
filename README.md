@@ -49,6 +49,10 @@ Welcome to RW-Template! This project is an advanced **VEX V5 autonomous robotics
 ### ⛓️ Motion Chaining
 - Seamlessly links multiple motion commands for fluid, uninterrupted autonomous routines.
 
+### 🧭📍 Distance Resets
+- Seamlessly integrated position resets using distance sensors.
+- Has support for sensors on all sides, or on just the specific sides you want.
+
 ### 💡 Easy Updates
 - `custom/` folder isolates personal changes from core logic  
 - future updates to core code are seamless
@@ -124,6 +128,11 @@ If using a horizontal and/or vertical tracking wheel:
 
 - Set `using_horizontal_tracker = true` and/or `using_vertical_tracker = true`
 - Configure tracker distances and diameters accordingly
+
+If using distance resets:
+
+- Configure your ports to the prebuilt sensor declarations (DO NOT CHANGE THE NAMES)
+- Set your sensor X and Y offsets (in inches) for each sensor (All offset values are positive)
 
 ### 4. Autonomous Programming
 
