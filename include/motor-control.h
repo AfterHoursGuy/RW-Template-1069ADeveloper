@@ -4,13 +4,13 @@
 // --- Global Variables (snake_case) ---
 extern bool is_turning;
 
-extern double xpos, ypos;
+extern double x_pos, y_pos;
 extern double correct_angle;
 
 // --- Function Declarations (lowerCamelCase) ---
 void driveChassis(double left_power, double right_power);
 
-double getInertialHeading(bool normalize = false);
+double getInertialHeading();
 double normalizeTarget(double angle);
 
 void turnToAngle(double turn_angle, double time_limit_msec, bool exit = true, double max_output = 12);

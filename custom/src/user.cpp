@@ -1,6 +1,7 @@
 #include "vex.h"
 #include "motor-control.h"
 #include "../custom/include/autonomous.h"
+#include "../custom/include/robot-config.h"
 
 // Modify autonomous, driver, or pre-auton code below
 
