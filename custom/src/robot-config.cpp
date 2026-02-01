@@ -20,20 +20,19 @@ motor left_chassis1 = motor(PORT1, ratio6_1, true);
 motor left_chassis2 = motor(PORT2, ratio6_1, true);
 motor left_chassis3 = motor(PORT3, ratio6_1, false);
 motor_group left_chassis = motor_group(left_chassis1, left_chassis2, left_chassis3);
-motor right_chassis1 = motor(PORT4, ratio6_1, false);
-motor right_chassis2 = motor(PORT5, ratio6_1, false);
-motor right_chassis3 = motor(PORT6, ratio6_1, true);
+motor right_chassis1 = motor(PORT6, ratio6_1, false);
+motor right_chassis2 = motor(PORT7, ratio6_1, false);
+motor right_chassis3 = motor(PORT8, ratio6_1, true);
 motor_group right_chassis = motor_group(right_chassis1, right_chassis2, right_chassis3);
 
-inertial inertial_sensor = inertial(PORT7);
-optical example_optical_sensor = optical(PORT8);
-distance example_distance_sensor = distance(PORT9);
-digital_out example_piston = digital_out(Brain.ThreeWirePort.A);
+inertial inertial_sensor = inertial(PORT18);
+optical example_optical_sensor = optical(PORT21);
+distance example_distance_sensor = distance(PORT21);
 
 // Format is rotation(port, reversed)
 // just set these to random ports if you don't use tracking wheels
-rotation horizontal_tracker = rotation(PORT10, true);
-rotation vertical_tracker = rotation(PORT11, true);
+rotation horizontal_tracker = rotation(PORT4, false);
+rotation vertical_tracker = rotation(PORT5, false);
 
 // Distance reset sensors
 // Set these to random ports if you are not using distance resets
@@ -42,27 +41,25 @@ distance left_sensor = distance(PORT13);
 distance right_sensor = distance(PORT14);
 distance back_sensor = distance(PORT15);
 
-// game specific devices for high stakes
-motor arm_motor1 = motor(PORT16, ratio18_1, true);
-motor arm_motor2 = motor(PORT17, ratio18_1, false);
-motor_group arm_motor = motor_group(arm_motor1, arm_motor2);
-motor intake_motor = motor(PORT18, ratio18_1, true);
-digital_out claw = digital_out(Brain.ThreeWirePort.B);
-digital_out rush_arm = digital_out(Brain.ThreeWirePort.C);
-optical optical_sensor = optical(PORT19);
-distance intake_distance = distance(PORT20);
-distance clamp_distance = distance(PORT21);
-digital_out mogo_mech = digital_out(Brain.ThreeWirePort.D);
+motor front_intake = motor(PORT20, ratio6_1, true);
+motor back_intake = motor(PORT9, ratio6_1, false);
+motor scoring = motor(PORT10, ratio6_1, true);
+motor_group intake = motor_group(front_intake, back_intake, scoring);
+digital_out wing = digital_out(Brain.ThreeWirePort.A);
+digital_out intake_lift = digital_out(Brain.ThreeWirePort.B);
+digital_out lift = digital_out(Brain.ThreeWirePort.C);
+digital_out odom_lift = digital_out(Brain.ThreeWirePort.D);
+digital_out hood = digital_out(Brain.ThreeWirePort.E);
 
 // ============================================================================
 // USER-CONFIGURABLE PARAMETERS (CHANGE BEFORE USING THIS TEMPLATE)
 // ============================================================================
 
 // Distance between the middles of the left and right wheels of the drive (in inches)
-double distance_between_wheels = 12.3;
+double distance_between_wheels = 11.25;
 
 // motor to wheel gear ratio * wheel diameter (in inches) * pi
-double wheel_distance_in = (36.0 / 48.0) * 3.17 * M_PI;
+double wheel_distance_in = (48.0 / 60.0) * 3.17 * M_PI;
 
 // PID Constants for movement
 // distance_* : Linear PID for straight driving
@@ -73,15 +70,15 @@ double turn_kp = 0.3, turn_ki = 0, turn_kd = 2.5;
 double heading_correction_kp = 0.6, heading_correction_ki = 0, heading_correction_kd = 4;
 
 // Enable or disable the use of tracking wheels
-bool using_horizontal_tracker = false;  // Set to true if a horizontal tracking wheel is installed and used for odometry
-bool using_vertical_tracker = false;   // Set to true if a vertical tracking wheel is installed and used for odometry
+bool using_horizontal_tracker = true;  // Set to true if a horizontal tracking wheel is installed and used for odometry
+bool using_vertical_tracker = true;   // Set to true if a vertical tracking wheel is installed and used for odometry
 
 // IGNORE THESE IF YOU ARE NOT USING TRACKING WHEELS
 // These comments are in the perspective of a top down view of the robot when the robot is facing vertical
 // Vertical distance from the center of the bot to the horizontal tracking wheel (in inches, positive is when the wheel is behind the center)
-double horizontal_tracker_dist_from_center = 2.71875;
+double horizontal_tracker_dist_from_center = 0;
 // Horizontal distance from the center of the bot to the vertical tracking wheel (in inches, positive is when the wheel is to the right of the center)
-double vertical_tracker_dist_from_center = -0.03125;
+double vertical_tracker_dist_from_center = 0;
 double horizontal_tracker_diameter = 1.975; // Diameter of the horizontal tracker wheel (in inches)
 double vertical_tracker_diameter = 1.975; // Diameter of the vertical tracker wheel (in inches)
 

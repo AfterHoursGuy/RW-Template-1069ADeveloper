@@ -6,7 +6,7 @@
 // Modify autonomous, driver, or pre-auton code below
 
 void runAutonomous() {
-  int auton_selected = 3;
+  int auton_selected = 1;
   switch(auton_selected) {
     case 1:
       exampleAuton();
@@ -15,7 +15,6 @@ void runAutonomous() {
       exampleAuton2();
       break;  
     case 3:
-      redGoalRush();
       break;
     case 4:
       break; 
@@ -39,9 +38,22 @@ bool button_a, button_b, button_x, button_y;
 bool button_up_arrow, button_down_arrow, button_left_arrow, button_right_arrow;
 int chassis_flag = 0;
 
+// pneumatic control
+bool scraperState = false;
+bool middleGoalState = false;
+bool parkPistonState = false;
+bool wingState = false;
+
+static bool intakeToggle = false;
+bool btnPrev = false;
+int pressStart = 0;
+bool longPress = false;
+bool intaken = false;
+
 void runDriver() {
   stopChassis(coast);
   heading_correction = false;
+  odom_lift.set(true); // lift odom wheels for driving
   while (true) {
     // [-100, 100] for controller stick axis values
     ch1 = controller_1.Axis1.value();
@@ -65,6 +77,73 @@ void runDriver() {
 
     // default tank drive or replace it with your preferred driver code here: 
     driveChassis(ch3 * 0.12, ch2 * 0.12);
+
+    bool btn = controller_1.ButtonL1.pressing();
+
+    // Button pressed this moment
+    if (btn && !btnPrev) {
+        pressStart = Brain.timer(msec);
+        longPress = false;
+    }
+
+    // If held long enough → reverse
+    if (btn && !longPress && Brain.timer(msec) - pressStart > 150) {
+        longPress = true;
+    }
+
+    // Handle release
+    if (!btn && btnPrev) {
+        if (!longPress) {
+            // short press → toggle
+            intakeToggle = !intakeToggle;
+        }
+        // if longPress: do nothing → return to toggle state
+    }
+
+    // Apply motor behavior
+    if (longPress && btn) {
+        // reverse while holding long press
+        front_intake.spin(reverse, 12, voltageUnits::volt);
+        scoring.spin(reverse, 12, voltageUnits::volt);
+    }
+    else if (intakeToggle) {
+        // normal toggle state
+        front_intake.spin(forward, 12, voltageUnits::volt);
+        scoring.spin(forward, 12, voltageUnits::volt);
+
+    } else if (r1) {
+        hood.set(true);
+        front_intake.spin(forward, 12, voltageUnits::volt);
+        scoring.spin(forward, 12, voltageUnits::volt);
+
+    } else if (!intaken && !r2) {
+        hood.set(false);
+        front_intake.stop(coast);
+        scoring.stop(coast);
+    }
+
+    btnPrev = btn;
+
+    // Right arrow toggle for Middle goal
+    static bool rightPrev = false;
+    if (button_right_arrow && !rightPrev) {
+    middleGoalState = !middleGoalState;
+    lift.set(middleGoalState);
+    }
+    rightPrev = button_right_arrow;
+
+    static bool yPrev = false;
+    if (button_y && !yPrev) {
+    wingState = !wingState;
+    wing.set(wingState);
+    }
+    yPrev = button_y;
+
+    if (r2) {
+        back_intake.spin(reverse, 12, voltageUnits::volt);
+    } else {
+        back_intake.stop(coast);
+    }
 
     wait(10, msec); 
   }
