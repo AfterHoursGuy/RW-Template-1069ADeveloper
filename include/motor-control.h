@@ -36,3 +36,5 @@ void resetPositionFront();
 void resetPositionBack();
 void resetPositionLeft();
 void resetPositionRight();
+
+void driveToWall(double target_in, double time_limit_msec, double hold_time = 500, bool exit = true, double max_output = 12);

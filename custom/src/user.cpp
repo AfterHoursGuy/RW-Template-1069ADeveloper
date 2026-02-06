@@ -6,7 +6,7 @@
 // Modify autonomous, driver, or pre-auton code below
 
 void runAutonomous() {
-  int auton_selected = 1;
+  int auton_selected = 3;
   switch(auton_selected) {
     case 1:
       exampleAuton();
@@ -15,12 +15,16 @@ void runAutonomous() {
       exampleAuton2();
       break;  
     case 3:
+      skills();
       break;
     case 4:
+      soloawp();
       break; 
     case 5:
+      rightwing();
       break;
     case 6:
+      leftwing();
       break;
     case 7:
       break;
@@ -43,12 +47,18 @@ bool scraperState = false;
 bool middleGoalState = false;
 bool parkPistonState = false;
 bool wingState = false;
+bool rearLiftState = false;
 
 static bool intakeToggle = false;
 bool btnPrev = false;
 int pressStart = 0;
 bool longPress = false;
 bool intaken = false;
+// R1 long-press control
+bool r1Prev = false;
+int r1PressStart = 0;
+bool r1LongPress = false;
+static int stored = 0;
 
 void runDriver() {
   stopChassis(coast);
@@ -100,29 +110,108 @@ void runDriver() {
         // if longPress: do nothing → return to toggle state
     }
 
+    // R1 press detection (short vs long)
+    if (r1 && !r1Prev) {
+      r1PressStart = Brain.timer(msec);
+      r1LongPress = false;
+    }
+    if (r1 && !r1LongPress && Brain.timer(msec) - r1PressStart > 300) {
+      r1LongPress = true;
+    }
+
     // Apply motor behavior
     if (longPress && btn) {
-        // reverse while holding long press
-        front_intake.spin(reverse, 12, voltageUnits::volt);
-        scoring.spin(reverse, 12, voltageUnits::volt);
-    }
-    else if (intakeToggle) {
-        // normal toggle state
-        front_intake.spin(forward, 12, voltageUnits::volt);
+      // L1 long-press: reverse while holding
+      front_intake.spin(reverse, 12, voltageUnits::volt);
+      scoring.spin(reverse, 12, voltageUnits::volt);
+
+    } else if (intakeToggle) {
+      static bool prev_lower = false;
+      static bool prev_upper = false;
+      static bool prev_intake_toggle = false;
+      // state: 0 = wait/run back intake until lower sees block
+      //        1 = stop back intake, keep scoring forward until upper sees block
+      //        2 = reverse scoring until both sensors empty -> go back to 0
+      static int intake_state = 0;
+
+      // initialize state when toggled on
+      if (intakeToggle && !prev_intake_toggle) {
+        intake_state = 0;
+      }
+
+      // keep front intake running (if desired)
+      front_intake.spin(forward, 12, voltageUnits::volt);
+
+      bool lower = lower_diverter_sensor.isNearObject();
+      bool upper = diverter_sensor.isNearObject();
+      bool lower_rising = lower && !prev_lower;
+      bool upper_rising = upper && !prev_upper;
+
+      if (intake_state == 0) {
+        // run scoring forward and back intake until lower diverter sees block
+        scoring.spin(forward, -12, voltageUnits::volt);
+        back_intake.spin(forward, -12, voltageUnits::volt);
+
+        if (lower_rising) {
+          wait(50, msec); // small delay to allow block to settle
+          back_intake.stop(coast);
+          intake_state = 1;
+        }
+
+      } else if (intake_state == 1) {
+        // keep scoring forward; wait for upper diverter to see a block
+        scoring.spin(forward, -12, voltageUnits::volt);
+
+        if (upper_rising) {
+          // begin reversing scoring to clear sensors
+          intake_state = 2;
+        }
+
+      } else { // intake_state == 2
+        // reverse scoring until both sensors are empty, then restart cycle
         scoring.spin(forward, 12, voltageUnits::volt);
+
+        if (!lower && !upper) {
+          intake_state = 0;
+        }
+      }
+
+      prev_lower = lower;
+      prev_upper = upper;
+      prev_intake_toggle = intakeToggle;
+
+    } else if (r1LongPress && r1) {
+      // R1 held long: run back intake and reverse scoring (also clear stored)
+      front_intake.spin(forward, 12, voltageUnits::volt);
+      scoring.spin(forward, 12, voltageUnits::volt);
+      back_intake.spin(forward, 12, voltageUnits::volt);
+      if (!middleGoalState) rear_lift.set(true);
+      stored = 0;
 
     } else if (r1) {
-        hood.set(true);
-        front_intake.spin(forward, 12, voltageUnits::volt);
-        scoring.spin(forward, 12, voltageUnits::volt);
+      // R1 short press / hold (default): open hood and spin front intake
+      hood.set(true);
+      front_intake.spin(forward, 12, voltageUnits::volt);
+      scoring.spin(forward, 12, voltageUnits::volt);
+      if (!middleGoalState) rear_lift.set(true);
 
-    } else if (!intaken && !r2) {
-        hood.set(false);
-        front_intake.stop(coast);
-        scoring.stop(coast);
+    } else if (r2) {
+      rear_lift.set(true);
+      scoring.spin(reverse, 12, voltageUnits::volt);
+      back_intake.spin(reverse, 12, voltageUnits::volt);
+      front_intake.stop(hold);
+      stored = 0;
+
+    } else if (!intaken && !r2 && !r1) {
+      rear_lift.set(false);
+      hood.set(false);
+      front_intake.stop(coast);
+      scoring.stop(coast);
+      back_intake.stop(coast);
     }
 
     btnPrev = btn;
+    r1Prev = r1;
 
     // Right arrow toggle for Middle goal
     static bool rightPrev = false;
@@ -139,11 +228,14 @@ void runDriver() {
     }
     yPrev = button_y;
 
-    if (r2) {
-        back_intake.spin(reverse, 12, voltageUnits::volt);
-    } else {
-        back_intake.stop(coast);
+    static bool l2Prev = false;
+    if (l2 && !l2Prev) {
+        scraperState = !scraperState;
+        scraper.set(scraperState);
     }
+    l2Prev = l2;
+
+    
 
     wait(10, msec); 
   }
@@ -175,4 +267,7 @@ void runPreAutonomous() {
   } else {
     thread odom = thread(trackNoOdomWheel);
   }
+
+  diverter_sensor.setLightPower(100); // set diverter optical sensor light power to max
+  lower_diverter_sensor.setLightPower(100); // set lower diverter optical sensor light power to max
 }

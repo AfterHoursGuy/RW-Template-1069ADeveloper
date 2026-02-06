@@ -25,7 +25,7 @@ motor right_chassis2 = motor(PORT7, ratio6_1, false);
 motor right_chassis3 = motor(PORT8, ratio6_1, true);
 motor_group right_chassis = motor_group(right_chassis1, right_chassis2, right_chassis3);
 
-inertial inertial_sensor = inertial(PORT18);
+inertial inertial_sensor = inertial(PORT16);
 optical example_optical_sensor = optical(PORT21);
 distance example_distance_sensor = distance(PORT21);
 
@@ -36,20 +36,25 @@ rotation vertical_tracker = rotation(PORT5, false);
 
 // Distance reset sensors
 // Set these to random ports if you are not using distance resets
-distance front_sensor = distance(PORT12);
-distance left_sensor = distance(PORT13);
-distance right_sensor = distance(PORT14);
-distance back_sensor = distance(PORT15);
+distance front_sensor = distance(PORT18);
+distance left_sensor = distance(PORT15);
+distance right_sensor = distance(PORT17);
+distance back_sensor = distance(PORT11);
 
 motor front_intake = motor(PORT20, ratio6_1, true);
 motor back_intake = motor(PORT9, ratio6_1, false);
 motor scoring = motor(PORT10, ratio6_1, true);
+
+optical diverter_sensor = optical(PORT14);
+optical lower_diverter_sensor = optical(PORT13);
+
 motor_group intake = motor_group(front_intake, back_intake, scoring);
 digital_out wing = digital_out(Brain.ThreeWirePort.A);
-digital_out intake_lift = digital_out(Brain.ThreeWirePort.B);
+digital_out rear_lift = digital_out(Brain.ThreeWirePort.B);
 digital_out lift = digital_out(Brain.ThreeWirePort.C);
 digital_out odom_lift = digital_out(Brain.ThreeWirePort.D);
 digital_out hood = digital_out(Brain.ThreeWirePort.E);
+digital_out scraper = digital_out(Brain.ThreeWirePort.F);
 
 // ============================================================================
 // USER-CONFIGURABLE PARAMETERS (CHANGE BEFORE USING THIS TEMPLATE)
@@ -91,10 +96,10 @@ double vertical_tracker_diameter = 1.975; // Diameter of the vertical tracker wh
 // All values should be positive numbers
 // If you are not using all four distance sensors, just set the unused ones to 0
 // If you are not using distance resets these values will be ignored
-double front_sensor_offset = 0.0;
-double left_sensor_offset = 0.0;
-double right_sensor_offset = 0.0;
-double back_sensor_offset = 0.0;
+double front_sensor_offset = 6.25;
+double left_sensor_offset = 6.75;
+double right_sensor_offset = 6.75;
+double back_sensor_offset = 9.75;
 
 // ============================================================================
 // ADVANCED TUNING (OPTIONAL)

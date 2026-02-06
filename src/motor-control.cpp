@@ -1397,6 +1397,49 @@ void resetPositionRight() {
     resetPositionWithSensor(right_sensor, right_sensor_offset, 90.0, field_half_size);
 }
 
+
+void driveToWall(double target_in, double time_limit_msec, double hold_time, bool exit, double max_output) {
+  //Reset and prepare
+  stopChassis(vex::brakeType::hold);
+  is_turning = true;
+
+  // PID for left and right wall distances
+  PID pid_fr(distance_kp, distance_ki, distance_kd);
+  
+  pid_fr.setTarget(target_in);
+
+  pid_fr.setIntegralMax(2);
+  
+  pid_fr.setSmallBigErrorTolerance(0.3, 1.0);
+  
+  pid_fr.setSmallBigErrorDuration(75, 200);
+  
+  double fr_output = 0;
+  double start_time = Brain.timer(msec);
+
+  // Main loop: move each side until both sensors are within tolerance
+  while ((!pid_fr.targetArrived()) && Brain.timer(msec) - start_time <= time_limit_msec && exit) {
+    double fr_dist = front_sensor.objectDistance(inches);
+    
+    // PID updates (positive output = forward)
+    fr_output = pid_fr.update(fr_dist);
+
+    // Scale outputs and limit acceleration
+    scaleToMax(fr_output, fr_output, max_output);
+
+    // Drive
+    driveChassis(-fr_output, -fr_output);
+    wait(20, msec);
+  }
+
+  // Stop and hold for specified time
+  stopChassis(vex::hold);
+  wait(hold_time, msec);
+  is_turning = false;
+
+}
+
+
 // ============================================================================
 // TEMPLATE NOTE
 // ============================================================================

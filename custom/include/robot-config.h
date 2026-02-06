@@ -28,11 +28,17 @@ extern distance back_sensor;
 extern motor back_intake;
 extern motor front_intake;
 extern motor scoring;
+
+extern optical diverter_sensor;
+extern optical lower_diverter_sensor;
+
 extern motor_group intake;
 extern digital_out wing;
+extern digital_out rear_lift;
 extern digital_out lift;
 extern digital_out odom_lift;
 extern digital_out hood;
+extern digital_out scraper;
 
 // USER-CONFIGURABLE PARAMETERS (CHANGE BEFORE USING THIS TEMPLATE)
 extern double distance_between_wheels;
