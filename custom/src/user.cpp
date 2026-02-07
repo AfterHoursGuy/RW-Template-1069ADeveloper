@@ -6,7 +6,7 @@
 // Modify autonomous, driver, or pre-auton code below
 
 void runAutonomous() {
-  int auton_selected = 3;
+  int auton_selected = 5;
   switch(auton_selected) {
     case 1:
       exampleAuton();

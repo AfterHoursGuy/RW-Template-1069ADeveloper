@@ -75,8 +75,8 @@ double turn_kp = 0.3, turn_ki = 0, turn_kd = 2.5;
 double heading_correction_kp = 0.6, heading_correction_ki = 0, heading_correction_kd = 4;
 
 // Enable or disable the use of tracking wheels
-bool using_horizontal_tracker = true;  // Set to true if a horizontal tracking wheel is installed and used for odometry
-bool using_vertical_tracker = true;   // Set to true if a vertical tracking wheel is installed and used for odometry
+bool using_horizontal_tracker = false;  // Set to true if a horizontal tracking wheel is installed and used for odometry
+bool using_vertical_tracker = false;   // Set to true if a vertical tracking wheel is installed and used for odometry
 
 // IGNORE THESE IF YOU ARE NOT USING TRACKING WHEELS
 // These comments are in the perspective of a top down view of the robot when the robot is facing vertical
